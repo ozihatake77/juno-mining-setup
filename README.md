@@ -8,7 +8,22 @@
 - **Algorithm:** RandomX (rx/juno)
 - **Pool:** [junopool.com](https://junopool.com) (fee 1%, auto payout, 648+ miners)
 - **Miner:** junorig (RandomX CPU miner)
-- **Best for:** CPU mining (AMD EPYC, Intel Xeon, atau CPU modern lainnya)
+- **Best for:** CPU mining (AMD EPYC, Intel Xeon, or any modern CPU)
+
+---
+
+## 💳 Create a Wallet
+
+Before mining, you need a JUNO wallet to receive your rewards.
+
+**Go to:** [thejunowallet.com](https://thejunowallet.com/)
+
+- Works on **PC (desktop browser)** and **Mobile (phone browser)**
+- Install the wallet extension or use the web version
+- Create a new wallet and **save your seed phrase in a safe place (offline)**
+- Copy your wallet address (format: `juno1...`)
+
+> ⚠️ **NEVER share your seed phrase or private key with anyone.**
 
 ---
 
@@ -21,14 +36,14 @@
 | OS | Ubuntu 20.04+ | Ubuntu 22.04 |
 | Storage | 10 GB | 20 GB |
 
-> **Note:** RandomX butuh RAM minimal 2GB per instance. Kalau VPS RAM-nya 8GB, bisa jalan 2-4 instance.
+> **Note:** RandomX requires at least 2GB RAM per instance. With 8GB RAM, you can run 2-4 instances.
 
 ---
 
 ## 🚀 Quick Setup (One Command)
 
 ```bash
-# Login ke VPS via SSH
+# Login to your VPS via SSH
 ssh root@YOUR_VPS_IP
 
 # Download & install junorig
@@ -43,29 +58,21 @@ junorig --version
 
 ## ⚙️ Configuration
 
-### 1. Buat Wallet Address
-
-Kamu butuh wallet address JUNO untuk menerima hasil mining. Bisa pakai:
-- [Keplr Wallet](https://www.keplr.app/) (recommended)
-- [Leap Wallet](https://leapwallet.io/)
-
-Setelah punya wallet, catat address-nya (format: `juno1...`)
-
-### 2. Buat Config File
+### 1. Create Config File
 
 ```bash
 mkdir -p /etc/junorig
 nano /etc/junorig/config.json
 ```
 
-Isi config:
+Paste this config:
 
 ```json
 {
   "pools": [
     {
       "url": "stratum+tcp://pool.junopool.com:3636",
-      "user": "JUNO_WALLET_ADDRESS",
+      "user": "YOUR_JUNO_WALLET_ADDRESS",
       "pass": "x"
     }
   ],
@@ -77,11 +84,11 @@ Isi config:
 }
 ```
 
-**Ganti:**
-- `JUNO_WALLET_ADDRESS` → wallet address JUNO lo (contoh: `juno1abc123...`)
-- `threads` → `0` = auto-detect semua core, atau set manual (contoh: `4`)
+**Replace:**
+- `YOUR_JUNO_WALLET_ADDRESS` → your JUNO wallet address (e.g. `juno1abc123...`)
+- `threads` → `0` = auto-detect all cores, or set manually (e.g. `4`)
 
-### 3. Simpan & keluar
+### 2. Save & Exit
 
 ```
 Ctrl+X → Y → Enter
@@ -91,28 +98,28 @@ Ctrl+X → Y → Enter
 
 ## 🏃 Running the Miner
 
-### Option 1: Manual (Testing)
+### Option 1: Manual (For Testing)
 
 ```bash
-junorig --url=stratum+tcp://pool.junopool.com:3636 --user=JUNO_WALLET_ADDRESS --pass=x
+junorig --url=stratum+tcp://pool.junopool.com:3636 --user=YOUR_JUNO_WALLET_ADDRESS --pass=x
 ```
 
-### Option 2: Background dengan tmux (Recommended)
+### Option 2: Background with tmux (Recommended)
 
 ```bash
-# Buat session tmux
+# Create a tmux session
 tmux new -s mining
 
-# Jalankan miner
-junorig --url=stratum+tcp://pool.junopool.com:3636 --user=JUNO_WALLET_ADDRESS --pass=x
+# Run the miner
+junorig --url=stratum+tcp://pool.junopool.com:3636 --user=YOUR_JUNO_WALLET_ADDRESS --pass=x
 
-# Keluar dari tmux (miner tetap jalan): Ctrl+B → D
+# Detach from tmux (miner keeps running): Ctrl+B → D
 
-# Balik ke session:
+# Re-attach to session:
 tmux attach -t mining
 ```
 
-### Option 3: Systemd Service (Auto-start on boot)
+### Option 3: Systemd Service (Auto-start on Boot)
 
 ```bash
 cat > /etc/systemd/system/junorig.service << 'EOF'
@@ -122,7 +129,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/junorig --url=stratum+tcp://pool.junopool.com:3636 --user=JUNO_WALLET_ADDRESS --pass=x
+ExecStart=/usr/local/bin/junorig --url=stratum+tcp://pool.junopool.com:3636 --user=YOUR_JUNO_WALLET_ADDRESS --pass=x
 Restart=always
 RestartSec=10
 Nice=19
@@ -140,7 +147,7 @@ systemctl start junorig
 # Check status
 systemctl status junorig
 
-# View logs
+# View live logs
 journalctl -u junorig -f
 ```
 
@@ -148,31 +155,31 @@ journalctl -u junorig -f
 
 ## 📊 Monitoring
 
-### Cek Status Mining di Pool
+### Check Mining Status on Pool
 
-Buka: `https://junopool.com` → masukkan wallet address → lihat:
+Open: `https://junopool.com` → enter your wallet address → view:
 - Hashrate
-- Shares accepted/rejected
+- Shares accepted / rejected
 - Balance
 - Payout history
 
-### Cek dari Terminal
+### Check from Terminal
 
 ```bash
-# Lihat log miner
+# View miner logs
 tail -f /var/log/junorig.log
 
-# Atau kalau pakai systemd
+# Or if using systemd
 journalctl -u junorig -f
 
-# Cek CPU usage
+# Check CPU usage
 htop
 
-# Cek miner process
+# Check miner process
 ps aux | grep junorig
 ```
 
-### Contoh Output Miner
+### Example Miner Output
 
 ```
 [2026-06-09 18:30:15] CPU #0: 525.3 H/s
@@ -189,63 +196,63 @@ ps aux | grep junorig
 
 | VPS Spec | Hashrate | Est. JUNO/day |
 |----------|----------|---------------|
-| 2 core (basic) | ~1,000 H/s | ~0.02-0.05 |
-| 4 core | ~2,000 H/s | ~0.04-0.10 |
-| 8 core (EPYC) | ~4,000 H/s | ~0.08-0.20 |
+| 2 cores (basic) | ~1,000 H/s | ~0.02-0.05 |
+| 4 cores | ~2,000 H/s | ~0.04-0.10 |
+| 8 cores (EPYC) | ~4,000 H/s | ~0.08-0.20 |
 
-> **Note:** Earnings tergantung difficulty network dan jumlah miner di pool. Ini estimasi kasar.
+> **Note:** Earnings depend on network difficulty and total pool hashrate. These are rough estimates.
 
 ---
 
 ## 🔧 Troubleshooting
 
-### Miner nggak mau jalan
+### Miner won't start
 ```bash
-# Cek apakah junorig ada
+# Check if junorig exists
 which junorig
 
-# Cek permission
+# Check permissions
 ls -la /usr/local/bin/junorig
 
-# Cek error log
+# Check error logs
 tail -20 /var/log/junorig.log
 ```
 
-### Hashrate rendah
+### Low hashrate
 ```bash
-# Cek CPU governor
+# Check CPU governor
 cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 
-# Set ke performance
+# Set to performance mode
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 ```
 
 ### Pool connection error
 ```bash
-# Test koneksi ke pool
+# Test connection to pool
 nc -zv pool.junopool.com 3636
 
-# Cek firewall
+# Check firewall
 ufw status
 ufw allow out 3636
 ```
 
-### Auto-restart kalau crash
-Kalau pakai tmux, bikin script wrapper:
+### Auto-restart on crash
+Create a wrapper script:
 
 ```bash
 cat > /root/start_mining.sh << 'EOF'
 #!/bin/bash
 while true; do
     echo "[$(date)] Starting junorig..."
-    junorig --url=stratum+tcp://pool.junopool.com:3636 --user=JUNO_WALLET_ADDRESS --pass=x
+    junorig --url=stratum+tcp://pool.junopool.com:3636 --user=YOUR_JUNO_WALLET_ADDRESS --pass=x
     echo "[$(date)] junorig exited. Restarting in 10s..."
     sleep 10
 done
 EOF
 chmod +x /root/start_mining.sh
 
-# Jalankan
+# Run it
 tmux new -s mining '/root/start_mining.sh'
 ```
 
@@ -258,18 +265,18 @@ tmux new -s mining '/root/start_mining.sh'
 | Pool URL | `stratum+tcp://pool.junopool.com:3636` |
 | Fee | 1% |
 | Min Payout | Auto |
-| Payout | Auto (langsung ke wallet) |
-| Miners | 648+ |
+| Payout | Auto (direct to wallet) |
+| Active Miners | 648+ |
 | Dashboard | https://junopool.com |
 
 ---
 
 ## ⚠️ Important Notes
 
-1. **Jangan share wallet address** — itu public, tapi jangan share private key / seed phrase
-2. **Monitor VPS cost** — pastikan hasil mining > biaya VPS
-3. **CPU usage** — set `CPUQuota=80%` supaya VPS tetap responsif
-4. **Backup wallet** — simpan seed phrase di tempat aman (offline)
+1. **Never share your seed phrase or private key**
+2. **Monitor VPS costs** — make sure mining rewards > VPS cost
+3. **CPU usage** — set `CPUQuota=80%` to keep VPS responsive
+4. **Backup your wallet** — store seed phrase offline in a safe place
 
 ---
 
